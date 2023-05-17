@@ -23,7 +23,7 @@ class LoginController extends Controller
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             throw ValidationException::withMessages([
-                'email' => ['the credentials you entered ara incorrect.']
+                'email' => ['the credentials you entered are incorrect.']
             ]);
         }
         return response()->json(['message' => 'login success', 'user' => $user], ResponseAlias::HTTP_OK);

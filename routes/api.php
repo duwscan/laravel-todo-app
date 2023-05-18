@@ -19,6 +19,11 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::prefix('v1')->group(function () {
+Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::apiResource('/tasks', TaskController::class);
+});
+Route::prefix('auth')->group(function () {
+    Route::post('/login', \App\Http\Controllers\Api\Auth\LoginController::class);
+    Route::post('/logout', \App\Http\Controllers\Api\Auth\LogoutController::class)->middleware('auth:sanctum');
+    Route::post('/signup', \App\Http\Controllers\Api\Auth\RegisterController::class);
 });

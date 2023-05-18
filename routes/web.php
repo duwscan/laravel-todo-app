@@ -17,7 +17,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 Route::prefix('auth')->group(function () {
-    Route::post('/login', \App\Http\Controllers\Auth\LoginController::class);
-    Route::post('/logout', \App\Http\Controllers\Auth\LogoutController::class);
-    Route::post('/signup', \App\Http\Controllers\Auth\RegisterController::class);
+    Route::post('/login', \App\Http\Controllers\Api\Auth\LoginController::class)->middleware('guest');
+    Route::post('/logout', \App\Http\Controllers\Api\Auth\LogoutController::class)->middleware('guest');
+    Route::post('/signup', \App\Http\Controllers\Api\Auth\RegisterController::class)->middleware('guest');
 });

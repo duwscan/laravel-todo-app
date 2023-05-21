@@ -1,29 +1,38 @@
 <template>
-    <main style="min-height: 50vh; margin-top: 2rem;">
+    <main style="min-height: 50vh; margin-top: 2rem">
         <div class="container">
             <div class="row">
                 <div class="col-md-8 offset-md-2">
                     <!-- Add new Task -->
-                    <div class="relative">
-                        <input type="text" class="form-control form-control-lg padding-right-lg"
-                               placeholder="+ Add new task. Press enter to save."/>
-                    </div>
+                    <NewTask @added="handleAddedTask"/>
                     <!-- List of uncompleted tasks -->
-                    <Tasks :tasks="uncompletedTasks"/>
+                    <Tasks
+                        @updated="handleUpdateTask"
+                        :tasks="uncompletedTasks"/>
                     <!--                    show toggle button-->
-                    <div class="text-center my-3" v-show="showToggleCompletedBtn">
-                        <button class="btn btn-sm btn-secondary"
-                                @click="$event =>showCompletedTasks = !showCompletedTasks">
+                    <div
+                        class="text-center my-3"
+                        v-show="showToggleCompletedBtn"
+                    >
+                        <button
+                            class="btn btn-sm btn-secondary"
+                            @click="
+                                ($event) =>
+                                    (showCompletedTasks = !showCompletedTasks)
+                            "
+                        >
                             <span v-if="!showCompletedTasks">
-                                    Show completed
+                                Show completed
                             </span>
-                            <span v-else>
-                                Hide completed
-                            </span>
+                            <span v-else> Hide completed </span>
                         </button>
                     </div>
                     <!--                    list completed tasks-->
-                    <Tasks :tasks="completedTasks" :show="completedTasksIsVisible && showCompletedTasks"/>
+                    <Tasks
+                        @updated="handleUpdateTask"
+                        :tasks="completedTasks"
+                        :show="completedTasksIsVisible && showCompletedTasks"
+                    />
                 </div>
             </div>
         </div>
@@ -31,20 +40,51 @@
 </template>
 <script setup>
 import {computed, onMounted, ref} from "vue";
-import {allTasks} from "@/http/task-api"
-import Tasks from "../components/tasks/Tasks.vue"
+import {allTasks, createTask, updateTask} from "../http/task-api";
+import Tasks from "../components/tasks/Tasks.vue";
+import NewTask from "../components/tasks/NewTask.vue";
 
-const tasks = ref([])
+const tasks = ref([]);
 onMounted(async () => {
     const {data} = await allTasks();
     tasks.value = data.data;
-})
+});
 
-const uncompletedTasks = computed(() => tasks.value.filter(task => !task.is_completed));
-const completedTasks = computed(() => tasks.value.filter(task => task.is_completed));
-const showToggleCompletedBtn = computed(() => uncompletedTasks.value.length > 0 && completedTasks.value.length > 0);
-const completedTasksIsVisible = computed(() => uncompletedTasks.value.length === 0 || completedTasks.value.length > 0);
+const uncompletedTasks = computed(() =>
+    tasks.value.filter((task) => !task.is_completed)
+);
+const completedTasks = computed(() =>
+    tasks.value.filter((task) => task.is_completed)
+);
+const showToggleCompletedBtn = computed(
+    () => uncompletedTasks.value.length > 0 && completedTasks.value.length > 0
+);
+const completedTasksIsVisible = computed(
+    () => uncompletedTasks.value.length === 0 || completedTasks.value.length > 0
+);
 const showCompletedTasks = ref(false);
+
+const handleAddedTask = async (newTask) => {
+    const {data: createdTask} = await createTask(newTask);
+    tasks.value.unshift(createdTask.data);
+};
+
+const handleUpdateTask = async (editedTask) => {
+    const data = await updateTask(editedTask.id, {name: editedTask.name});
+    const updatedTask = data.data.data;
+    const currentTask = tasks.value.find(item => item.id === updatedTask.id);
+    try {
+        if (currentTask) {
+            currentTask.name = updatedTask.name;
+        } else {
+            // Handle the case when the task is not found
+            console.error('Task not found');
+        }
+    } catch (error) {
+        // Handle the error that occurred during the task update
+        console.error('Error updating task:', error);
+    }
+}
 </script>
 <style>
 .form-check-input.completed {

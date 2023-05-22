@@ -8,6 +8,8 @@
                     <!-- List of uncompleted tasks -->
                     <Tasks
                         @updated="handleUpdateTask"
+                        @completed="handleCompleteTask"
+                        @removed="handleRemoveTask"
                         :tasks="uncompletedTasks"/>
                     <!--                    show toggle button-->
                     <div
@@ -30,6 +32,8 @@
                     <!--                    list completed tasks-->
                     <Tasks
                         @updated="handleUpdateTask"
+                        @completed="handleCompleteTask"
+                        @removed="handleRemoveTask"
                         :tasks="completedTasks"
                         :show="completedTasksIsVisible && showCompletedTasks"
                     />
@@ -40,7 +44,7 @@
 </template>
 <script setup>
 import {computed, onMounted, ref} from "vue";
-import {allTasks, createTask, updateTask} from "../http/task-api";
+import {allTasks, createTask, updateTask, completeTask, removeTask} from "../http/task-api";
 import Tasks from "../components/tasks/Tasks.vue";
 import NewTask from "../components/tasks/NewTask.vue";
 
@@ -84,6 +88,29 @@ const handleUpdateTask = async (editedTask) => {
         // Handle the error that occurred during the task update
         console.error('Error updating task:', error);
     }
+}
+
+const handleCompleteTask = async (task) => {
+    const data = await completeTask(task.id, {is_completed: task.is_completed});
+    const updatedTask = data.data.data;
+    const currentTask = tasks.value.find(item => item.id === updatedTask.id);
+    try {
+        if (currentTask) {
+            currentTask.is_completed = updatedTask.is_completed;
+        } else {
+            // Handle the case when the task is not found
+            console.error('Task not found');
+        }
+    } catch (error) {
+        // Handle the error that occurred during the task update
+        console.error('Error complete task:', error);
+    }
+}
+
+const handleRemoveTask = async (task) => {
+    await removeTask(task.id);
+    const index = tasks.value.findIndex(item => item.id === task.id)
+    tasks.value.splice(index, 1);
 }
 </script>
 <style>

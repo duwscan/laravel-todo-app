@@ -24,8 +24,8 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::apiResource('/tasks', TaskController::class);
     Route::patch('/tasks/{task}/complete', CompleteTaskController::class);
 });
-Route::prefix('auth')->group(function () {
-    Route::post('/login', \App\Http\Controllers\Api\Auth\LoginController::class);
-    Route::post('/logout', \App\Http\Controllers\Api\Auth\LogoutController::class)->middleware('auth:sanctum');
-    Route::post('/signup', \App\Http\Controllers\Api\Auth\RegisterController::class);
+Route::prefix('v1/auth')->group(function () {
+    Route::post('/login', \App\Http\Controllers\Api\V1\Auth\LoginController::class);
+    Route::post('/logout', \App\Http\Controllers\Api\V1\Auth\LogoutController::class)->middleware('auth:sanctum');
+    Route::post('/signup', \App\Http\Controllers\Api\V1\Auth\RegisterController::class);
 });

@@ -25,5 +25,4 @@ const addNewTask = (event) => {
         emit("added", newTask);
     }
 };
-
 </script>

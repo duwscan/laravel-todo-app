@@ -22,11 +22,10 @@
                 <ul class="navbar-nav ms-auto">
                     <template v-if="true">
                         <li class="nav-item">
-                            <a class="btn btn-outline-secondary ms-2">Login
-                            </a>
+                            <Login/>
                         </li>
                         <li class="nav-item">
-                            <a class="btn btn-danger ms-2">Register</a>
+                            <Register/>
                         </li>
                     </template>
                     <template v-else>
@@ -48,6 +47,8 @@
 
 <script setup>
 import {ref, computed} from "vue";
+import Login from "./buttons/Login.vue";
+import Register from "./buttons/Register.vue";
 // import {useRouter} from "vue-router";
 // import {useAuthStore} from "../stores/auth";
 //

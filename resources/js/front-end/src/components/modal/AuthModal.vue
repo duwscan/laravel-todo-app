@@ -7,11 +7,19 @@
                         <div class="card-body p-5 text-center">
                             <h3 class="mb-5" v-if='action === "SIGN_IN"'>Sign in</h3>
                             <h3 class="mb-5" v-if='action === "SIGN_UP"'>Sign Up</h3>
+                            <div class="form-outline mb-4 text-start" v-if='action === "SIGN_UP"'>
+                                <label class="form-label" for="typeNameX-2">Name</label>
+                                <input type="email" id="typeNameX-2" class="form-control form-control-lg"
+                                       v-model="registerExtendPayload.name"/>
+                                <div class="form-text text-danger" v-if="formError.name">
+                                    {{ formError.name.join("") }}
+                                </div>
+                            </div>
                             <div class="form-outline mb-4 text-start">
                                 <label class="form-label" for="typeEmailX-2">Email</label>
                                 <input type="email" id="typeEmailX-2" class="form-control form-control-lg"
                                        v-model="formPayload.email"/>
-                                <div class="form-text" v-if="formError.email">
+                                <div class="form-text text-danger" v-if="formError.email">
                                     {{ formError.email.join("") }}
                                 </div>
                             </div>
@@ -20,13 +28,14 @@
                                 <input type="password" id="typePasswordX-2"
                                        class="form-control form-control-lg"
                                        v-model="formPayload.password"/>
-                                <div class="form-text" v-if="formError.password">
+                                <div class="form-text text-danger" v-if="formError.password">
                                     {{ formError.password.join("") }}
                                 </div>
                             </div>
                             <div class="form-outline mb-4 text-start" v-if='action === "SIGN_UP"'>
                                 <label class="form-label" for="typePasswordX-3">Password Confirmation</label>
-                                <input type="password" id="typePasswordX-3" class="form-control form-control-lg"/>
+                                <input type="password" id="typePasswordX-3" class="form-control form-control-lg"
+                                       v-model="registerExtendPayload.password_confirmation"/>
                             </div>
                             <button class="btn btn-primary btn-lg btn-block" @click.stop="handleAuth">{{
                                     action === "SIGN_IN" ? "Sign In" : "Sign Up"
@@ -57,12 +66,17 @@ const formPayload = reactive({
     email: "",
     password: "",
 })
+const registerExtendPayload = reactive({
+    password_confirmation: "",
+    name: "",
+})
 const handleAuth = async () => {
-    props.action === "SIGN_IN" ? await authStore.handleLogin(formPayload) : await authStore.handleSignup({});
+    props.action === "SIGN_IN" ? await authStore.handleLogin(formPayload) : await authStore.handleSignup({
+        ...formPayload,
+        ...registerExtendPayload
+    });
     if (authStore.errors) {
         formError.value = authStore.errors
-    } else {
-        console.log(authStore.user);
     }
 };
 </script>

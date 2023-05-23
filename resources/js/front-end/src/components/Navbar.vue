@@ -13,14 +13,13 @@
                 <ul class="navbar-nav">
                     <li class="nav-item">
                         <a class="nav-link">Tasks</a>
-                        <!-- <a href="#" @click.prevent="$router.push('/tasks')" class="nav-link">Tasks</a> -->
                     </li>
                     <li class="nav-item">
                         <a class="nav-link">Summary</a>
                     </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
-                    <template v-if="true">
+                    <template v-if="!authStore.user">
                         <li class="nav-item">
                             <Login/>
                         </li>
@@ -32,10 +31,10 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" :class="toggleClass" @click.prevent="toggle" href="#"
                                role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                User name
+                                {{ authStore.user.name }}
                             </a>
                             <ul class="dropdown-menu" :class="toggleClass">
-                                <li><a href="#" class="dropdown-item">Logout</a></li>
+                                <li><a href="#" class="dropdown-item" @click="authStore.handleLogout()">Logout</a></li>
                             </ul>
                         </li>
                     </template>
@@ -49,21 +48,11 @@
 import {ref, computed} from "vue";
 import Login from "./buttons/Login.vue";
 import Register from "./buttons/Register.vue";
-// import {useRouter} from "vue-router";
-// import {useAuthStore} from "../stores/auth";
-//
-// const router = useRouter()
-// const store = useAuthStore()
+import {useAuthStore} from "../stores/auth";
+
+const authStore = useAuthStore();
 const isOpen = ref(false)
-//
-// const logout = async () => {
-//     await store.handleLogout()
-//     isOpen.value = false
-//     router.push({name: 'login'})
-// }
-
 const toggle = () => isOpen.value = !isOpen.value
-
 const toggleClass = computed(() => isOpen.value === true ? 'show' : '')
 </script>
 <style scoped>

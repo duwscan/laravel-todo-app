@@ -4,12 +4,12 @@
             <div class="row">
                 <div class="col-md-8 offset-md-2">
                     <!-- Add new Task -->
-                    <NewTask @added="handleAddedTask"/>
+                    <NewTask @added="store.handleAddedTask"/>
                     <!-- List of uncompleted tasks -->
                     <Tasks
-                        @updated="handleUpdateTask"
-                        @completed="handleCompleteTask"
-                        @removed="handleRemoveTask"
+                        @updated="store.handleUpdatedTask"
+                        @completed="store.handleCompletedTask"
+                        @removed="store.handleRemovedTask"
                         :tasks="uncompletedTasks"/>
                     <!--                    show toggle button-->
                     <div
@@ -31,9 +31,9 @@
                     </div>
                     <!--                    list completed tasks-->
                     <Tasks
-                        @updated="handleUpdateTask"
-                        @completed="handleCompleteTask"
-                        @removed="handleRemoveTask"
+                        @updated="store.handleUpdatedTask"
+                        @completed="store.handleCompletedTask"
+                        @removed="store.handleRemovedTask"
                         :tasks="completedTasks"
                         :show="completedTasksIsVisible && showCompletedTasks"
                     />
@@ -47,71 +47,22 @@ import {computed, onMounted, ref} from "vue";
 import {allTasks, createTask, updateTask, completeTask, removeTask} from "../http/task-api";
 import Tasks from "../components/tasks/Tasks.vue";
 import NewTask from "../components/tasks/NewTask.vue";
+import {useTaskStore} from "../stores/task";
+import {storeToRefs} from "pinia";
 
-const tasks = ref([]);
+const store = useTaskStore()
+const {completedTasks, uncompletedTasks} = storeToRefs(store)
 onMounted(async () => {
-    const {data} = await allTasks();
-    tasks.value = data.data;
-});
+    await store.fetchAllTasks()
+})
 
-const uncompletedTasks = computed(() =>
-    tasks.value.filter((task) => !task.is_completed)
-);
-const completedTasks = computed(() =>
-    tasks.value.filter((task) => task.is_completed)
-);
 const showToggleCompletedBtn = computed(
     () => uncompletedTasks.value.length > 0 && completedTasks.value.length > 0
-);
+)
 const completedTasksIsVisible = computed(
     () => uncompletedTasks.value.length === 0 || completedTasks.value.length > 0
-);
-const showCompletedTasks = ref(false);
-
-const handleAddedTask = async (newTask) => {
-    const {data: createdTask} = await createTask(newTask);
-    tasks.value.unshift(createdTask.data);
-};
-
-const handleUpdateTask = async (editedTask) => {
-    const data = await updateTask(editedTask.id, {name: editedTask.name});
-    const updatedTask = data.data.data;
-    const currentTask = tasks.value.find(item => item.id === updatedTask.id);
-    try {
-        if (currentTask) {
-            currentTask.name = updatedTask.name;
-        } else {
-            // Handle the case when the task is not found
-            console.error('Task not found');
-        }
-    } catch (error) {
-        // Handle the error that occurred during the task update
-        console.error('Error updating task:', error);
-    }
-}
-
-const handleCompleteTask = async (task) => {
-    const data = await completeTask(task.id, {is_completed: task.is_completed});
-    const updatedTask = data.data.data;
-    const currentTask = tasks.value.find(item => item.id === updatedTask.id);
-    try {
-        if (currentTask) {
-            currentTask.is_completed = updatedTask.is_completed;
-        } else {
-            // Handle the case when the task is not found
-            console.error('Task not found');
-        }
-    } catch (error) {
-        // Handle the error that occurred during the task update
-        console.error('Error complete task:', error);
-    }
-}
-
-const handleRemoveTask = async (task) => {
-    await removeTask(task.id);
-    const index = tasks.value.findIndex(item => item.id === task.id)
-    tasks.value.splice(index, 1);
-}
+)
+const showCompletedTasks = ref(completedTasksIsVisible.value)
 </script>
 <style>
 .form-check-input.completed {
